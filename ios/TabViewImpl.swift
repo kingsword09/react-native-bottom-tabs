@@ -56,40 +56,8 @@ struct TabViewImpl: View {
   var body: some View {
     TabView(selection: $props.selectedPage) {
       ForEach(props.children.indices, id: \.self) { index in
-        let child = props.children[safe: index] ?? UIView()
-        let tabData = props.items[safe: index]
-        let icon = props.icons[index]
-        
-        RepresentableView(view: child)
-          .ignoresTopSafeArea(
-            props.ignoresTopSafeArea ?? false,
-            frame: child.frame
-          )
-          .tabItem {
-            TabItem(
-              title: tabData?.title,
-              icon: icon,
-              sfSymbol: tabData?.sfSymbol,
-              labeled: props.labeled
-            )
-          }
-          .tag(tabData?.key)
-          .tabBadge(tabData?.badge)
-#if os(iOS)
-          .onAppear {
-            // SwiftUI doesn't change `selection` when clicked on items from the "More" list.
-            // More tab is visible only if we have more than 5 items.
-            // This is a workaround that fixes the "More" feature.
-            if index < 4 {
-              return
-            }
-            if let key = tabData?.key, props.selectedPage != key {
-              onSelect(key)
-            }
-          }
-#endif
+        renderTabItem(at: index)
       }
-      
     }
     .onTabItemLongPress({ index in
       if let key = props.items[safe: index]?.key {
@@ -110,6 +78,42 @@ struct TabViewImpl: View {
       
       onSelect(newValue)
       emitHapticFeedback()
+    }
+  }
+  
+  @ViewBuilder
+  private func renderTabItem(at index: Int) -> some View {
+    let tabData = props.items[safe: index]
+    let isHidden = tabData?.hidden ?? false
+    let isFocused = props.selectedPage == tabData?.key
+    
+    if !isHidden || isFocused {
+      let child = props.children[safe: index] ?? UIView()
+      let icon = props.icons[index]
+      
+      RepresentableView(view: child)
+        .ignoresTopSafeArea(
+          props.ignoresTopSafeArea ?? false,
+          frame: child.frame
+        )
+        .tabItem {
+          TabItem(
+            title: tabData?.title,
+            icon: icon,
+            sfSymbol: tabData?.sfSymbol,
+            labeled: props.labeled
+          )
+        }
+        .tag(tabData?.key)
+        .tabBadge(tabData?.badge)
+#if os(iOS)
+        .onAppear {
+          guard index >= 4,
+                let key = tabData?.key,
+                props.selectedPage != key else { return }
+          onSelect(key)
+        }
+#endif
     }
   }
   

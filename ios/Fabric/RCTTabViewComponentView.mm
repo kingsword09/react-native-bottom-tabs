@@ -178,7 +178,7 @@ NSArray* convertItemsToArray(const std::vector<RNCTabViewItemsStruct>& items) {
   NSMutableArray<TabInfo *> *result = [NSMutableArray array];
 
   for (const auto& item : items) {
-    auto tabInfo = [[TabInfo alloc] initWithKey:RCTNSStringFromString(item.key) title:RCTNSStringFromString(item.title) badge:RCTNSStringFromString(item.badge) sfSymbol:RCTNSStringFromString(item.sfSymbol) activeTintColor:RCTUIColorFromSharedColor(item.activeTintColor)];
+    auto tabInfo = [[TabInfo alloc] initWithKey:RCTNSStringFromString(item.key) title:RCTNSStringFromString(item.title) badge:RCTNSStringFromString(item.badge) sfSymbol:RCTNSStringFromString(item.sfSymbol) activeTintColor:RCTUIColorFromSharedColor(item.activeTintColor) hidden:item.hidden];
 
     [result addObject:tabInfo];
   }
